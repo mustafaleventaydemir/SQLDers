@@ -300,3 +300,45 @@ ORDER BY a.City --2 ayrı Customers tablosunda CustomerID'leri birbiriyle aynı 
 ![C:\Users\musta\OneDrive\Masaüstü\SQLDers](img_left_join.png) 
 ![C:\Users\musta\OneDrive\Masaüstü\SQLDers](img_right_join.png) 
 ![C:\Users\musta\OneDrive\Masaüstü\SQLDers](img_full_outer_join.png) 
+```sql
+--**UNION Birdeb fazla Select ifadesinin sonucunu tek bir sütunda toplar ve getirir.
+SELECT City FROM Customers
+UNION
+SELECT City FROM Suppliers
+UNION
+SELECT City FROM Employees
+ORDER BY City --Customers, Suppliers ve Employees tablolarından City kayıtlarını aldı ve hepsini birleştirerek tek sütunda bize getirdi.
+SELECT City FROM Customers
+UNION ALL
+SELECT City FROM Suppliers --UNION ALL dersek birleştirmeden kaçar tane varsa o şekilde bize geri getirir.
+SELECT City FROM Customers
+WHERE Country="Germany"
+UNION
+SELECT City FROM Suppliers
+WHERE Country="Germany"
+ORDER BY City --Sadece ülkesi Almanya olan değerler getirilir.
+SELECT City FROM Customers
+WHERE Country="Germany"
+UNION ALL
+SELECT City FROM Suppliers
+WHERE Country="Germany"
+ORDER BY City --Sadece ülkesi Almanya olan değerler getirilir ve UNION ALL olduğu için yinelenen kayıtlarda getirilir.
+SELECT 'Customer' AS Type,ContactName, City, Country
+FROM Customers
+UNION
+select 'Supplier',ContactName, City, Country
+FROM Suppliers --Tüm Customers ve Suppliers'leri getirir. Gelen kayıtların nereden geldiğini anlamak için geçici bir tip oluşturduk. Ve buna takma ad verdik.
+```
+```sql
+--**GROUP BY aynı değerlere ait olan kayıtları tek kayıt olarak almamıza sağlar.
+SELECT count(CustomerID), Country
+FROM Customers
+GROUP BY Country
+ORDER BY count(customerID) DESC --Customers tablosunda ülkeleri gruplandırarak CustomerID sayılarına göre getiriyor. ve en son yine CustomerID sayılarına göre büyükten küçüğe sıralıyor.
+SELECT s.CompanyName, count(o.OrderID) AS NumberOfOrders FROM Orders AS o
+LEFT JOIN Shippers AS s ON o.ShipVia=s.ShipperID
+GROUP BY CompanyName --Orders(sol) tablosundaki tüm verileri ve Orders'ın içinde bulunan Shipper tablosundaki kayıtlarını CompanyName'e göre gruplandırıp OrderID değerlerini getirir.
+```
+```sql
+--**HAVING
+```
