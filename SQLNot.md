@@ -337,8 +337,176 @@ GROUP BY Country
 ORDER BY count(customerID) DESC --Customers tablosunda ülkeleri gruplandırarak CustomerID sayılarına göre getiriyor. ve en son yine CustomerID sayılarına göre büyükten küçüğe sıralıyor.
 SELECT s.CompanyName, count(o.OrderID) AS NumberOfOrders FROM Orders AS o
 LEFT JOIN Shippers AS s ON o.ShipVia=s.ShipperID
-GROUP BY CompanyName --Orders(sol) tablosundaki tüm verileri ve Orders'ın içinde bulunan Shipper tablosundaki kayıtlarını CompanyName'e göre gruplandırıp OrderID değerlerini getirir.
+GROUP BY CompanyName --Orders(sol) tablosundaki tüm verileri ve Orders'ın içinde bulunan Shipper tablosundaki verileri CompanyName'e göre gruplandırıp OrderID değerlerini getirir.
 ```
 ```sql
---**HAVING
+--**HAVING where toplama işlemlerinde (count)kullanılamadığı için having'i kullanırız.
+select COUNT(CustomerID), Country
+from Customers
+Group by Country
+having COUNT(CustomerID)>3 --Customers tablosunu ülkelerine göre gruplandırır ve 3'ten fazla olan ülkelerin sayılarını bize getirir.
+--!ÖNEMLİ 
+--Aslında illa CustomerID'den sayılarını almamız gerekmez. Ülkelere bakıyor ve bize bu ülke adında kaç tane CustomerID varsa getiriyor. CompanyName'de olabilirdi.
+select e.LastName, COUNT(o.OrderID) AS sayı
+from (Orders AS o 
+INNER JOIN Employees AS e ON o.EmployeeID=e.EmployeeID)
+Group by LastName
+having COUNT(o.OrderID)>10 --10'dan fazla sipariş kaydeden çalışanları listeler.
+select e.LastName, COUNT(o.OrderID) AS sayı
+from (Orders AS o 
+INNER JOIN Employees AS e ON o.EmployeeID=e.EmployeeID)
+where LastName='Dodsworth' OR LastName='Fuller'
+Group by LastName
+having COUNT(o.OrderID)>10 --10'dan fazla sipariş kaydeden Dodsworth veya Fuller soyisimli çalışlanları listeler.
 ```
+```sql
+--**EXISTS ve NOT EXISTS alt sorgularda istenilen şartların yerine getirilip getirilmediğine bakar ve bize değer döner.(T/F)
+select ContactName
+from Suppliers
+where exists(select ProductName from Products where Products.ProductID=Suppliers.SupplierID AND UnitPrice>20) --Alt sorguda tedarikcileri aynı olan ve Birim fiyatı 20'den büyük olanları getirir.
+select ContactName
+from Suppliers
+where not exists(select ProductName from Products where Products.ProductID=Suppliers.SupplierID AND UnitPrice>20) --Alt sorguda tedarikcileri Suppliers ve Products tablosunda bulunan ve birim fiyatları 20'den büyük olan kayıtları buldu. ama not exists dediğimiz için bu koşula uygun olmayanları bize getirdi.
+```
+```sql
+--**ANY ve ALL 
+-- Any alt sorgumuzdaki koşulumuz herhangi birini karşılıyorsa bize true döner. koşullardan birisi karşılanıp diğeri karşılanmasa bile bize değer döner.
+-- All alt sorgumuzdaki tüm koşulların karşılandığı durumlarda bize değer döndürür.
+select ProductName
+from Products
+where ProductID = ANY
+(Select ProductID
+from [Order Details]
+where Quantity=100) --OrderDetails tablosunda Quantity'si 100'e eşit olan herhangi bir kaydın ProductID'si, Products tablosundaki ProductID'lere eşitse bize değeri döndürür.
+select ProductName
+from Products 
+where ProductID = ALL (select ProductID from [Order Details] where Quantity=90) --OrderDetails tablosundaki quantity'lerin hepsi 90'a eşit mi? bir çok kayıt olup hepsi farklı olduğu için bize false döner. Aslında ALL metodunda eşitlik sorguları gereksiz olabilir.
+```
+```sql
+--**SELECT INTO  var olan bir tablonun verilerini yeni bir tabloya taşımamızı sağlar.
+select * into CustomersCopy
+from Customers --CustomersCopy adında bir tablo oluşturdu ve Customers tablosundaki tüm verileri içerisine aktardı.
+SELECT * INTO CustomersBackup2017 IN 'Backup.mdb'
+FROM Customers --Başka bir veritabanındaki tabloyu yeni tablomuza kopyalamak için bu şekille kullanılır.
+select ContactName, Address Into CustomersCopy2 
+from Customers --yeni tabloya Customers tablosundan sadece ContactName ve Address bilgilerini kopyaladı.
+select ContactName, Address into CustomersCopy3 
+from Customers
+where Country='Germany' --Ülkesi Almanya olan kayıtları yeni tabloya kopyalayadı.
+select c.ContactName, c.Country, o.CustomerID,o.OrderDate
+into jointablosu2
+from Customers AS c 
+LEFT JOIN Orders AS o ON c.CustomerID=o.CustomerID --joinleri kullanarak iki ayrı tablodanda kayıt kopyalayabiliriz.
+select * into sema1
+from Customers
+where 1=0 --eğer bir tablonun şemasını kullanmak istiyorsak. şartı false dönen bir durum girip sadece şemayı kopyalayabiliriz.
+```
+```sql
+--**INSERT INTO SELECT verileri bir tablodan kopyalayıp başka bir tabloya ekler. kopyalanacak kayıt sütunlarının birbirini karşılaması şarttır.
+INSERT INTO Customers (CustomerName, City, Country)
+SELECT SupplierName, City, Country FROM Suppliers --Suppliers tablosundaki istenilen kayıtlar Customers tablosuna kaydedildi. Doldurulmayan kayıtlar ise NULL dolduruldu.
+INSERT INTO Customers (CustomerName, City, Country)
+SELECT SupplierName, City, Country FROM Suppliers
+WHERE Country='Germany' --Customers tablosuna Suppliers tablosundan ülkesi Almanya olanların bilgisi dolduruldu.
+```
+```sql
+--**CASE if else yapısıyla aynıdır.
+select OrderID, Quantity,
+case
+when Quantity=30 then 'quantity 30a eşit'
+when Quantity>30 then 'quantity 30dan büyük'
+else 'quantity 30dan küçük'
+end as quantitytext
+from [Order Details] --30'a eşitse şunu yap, 30'dan büyükse şunu yap, değilse 30'dan küçüktür..
+--end as quantitytext=quantitytext adında sütun oluşturup içine bilgileri yazdırdı.
+select ContactName, City, Country
+from Customers
+Order by
+(case when City IS NULL then Country
+else City end) --Şehir NULL ise ülkeye göre sırala, değilse şehire göre sırala.
+```
+```sql
+--** ISNULL fonksiyonu kayıtlarda herhangi bir toplama vs işlemlerinde null değer varsa bize null döner. Null dönememsi için isnull fonksiyonunu kullanırız.
+SELECT ProductName, UnitPrice * (UnitsInStock + UnitsOnOrder)
+FROM Products -- Burada UnitsOnOrder sütununda null değer varsa bize null değer döndürür.
+select ProductName, UnitPrice* (UnitsInStock+ISNULL(UnitsOnOrder,0))
+from Products --ama ISNULL() kullandığımızda null ise 0 döndür anlamında bir durum söz konusu olur.
+```
+```sql
+--** STORED PROCEDURE (saklı prosedür) 
+--  sürekli kullandığımız sql sorguları varsa stored procedure ile bu sql sorgularını kayıt altına alıp tekrar tekrar yazmadan sql sorgusunu çağırarak elde edebiliriz.
+create procedure GetProductsTable
+AS
+select * from Products
+GO --Products tablome select sorgusu attım ve bunu procedure olarak oluşturdum.
+exec GetProductsTable --komutunu yazdığım anda bana select sorgum otomatik olarak gelecek.
+create procedure GetCustomersData @City nvarchar(30), @ContactName nvarchar(40)
+AS
+select * from Customers Where City=@City OR ContactName=@ContactName
+GO --bir veya birden fazla parametreler vererek procedure oluşturabilirim. 
+exec GetCustomersData @City='London', @ContactName='Liz Nixon' --Parametrelerin değerlerini vererek uygun kayıtları döndürebiliriz.
+```
+
+# SQL Database oluşturma işlemleri
+
+```sql
+--**CREATE DATABASE yeni bir database oluşturur.
+CREATE DATABASE testDB --testDB adında database oluşturuldu.
+DROP DATABASE testDB --testDB adında database kaldırıldı.
+BACKUP DATABASE testDB
+TO DISK = 'D:\backups\testDB.bak' --testDB'nin yedeğini belirttiğimiz dizine oluşturur.
+--**ÖNEMLİ 
+--FULL BACKUP oluşturulduktan sonra WITH DIFFERENTIAL ile sadece değişen,eklenen,silinen vs kayıtlar güncellenir. Zamandan tasarruf sağlar.
+BACKUP DATABASE testDB
+TO DISK = 'D:\backups\testDB.bak'
+WITH DIFFERENTIAL --kullanımı bu şekildedir.
+```
+```sql
+--**CREATE TABLE oluşturulan veritabanına yeni tablolar ekleriz.
+CREATE TABLE Persons (
+    PersonID int,
+    LastName varchar(255),
+    FirstName varchar(255),
+    Address varchar(255),
+    City varchar(255)
+) --Persons adında tablo oluşturdum ve içerisine sütunlarını girdim. ilerleyen zamanlarda primarykey,foreign key öğreneceğiz.
+CREATE TABLE TestTable AS
+SELECT customername, contactname
+FROM customers --customers tablosunu referans alarak bir tablo oluşturabiliriz.
+```
+```sql
+--*DROP TABLE ve TRUNCATE TABLE
+DROP TABLE Shippers
+--drop table bir tabloyu silmek için kullanılır.
+TRUNCATE TABLE Shippers
+-- truncate table tablonun içindeki verileri silmek için kullanılır.
+```
+```sql
+--*ALTER TABLE bir tabloya yeni sütun ekleme ya da silmek için kullanılır. Ayrıca kısıtlama ekleme ve kaldırma gibi işlerde yapılır.
+ALTER TABLE Customers
+ADD Email varchar(255)--Email sütunu eklendi
+
+ALTER TABLE Customers
+DROP COLUMN Email --Email sütununu sildi.
+
+EXEC sp_rename 'Customers.Fax',  'FaxYeni', 'COLUMN' --Customers tablosundaki Fax sütunun adını FaxYeni olarak değiştirdi.
+
+alter table Customers
+alter column City nvarchar(30)--Customers tablosundaki City sütununun tipini değiştirdik.
+--tipini dğeiştirebilir ya da tipi üzerinde değişiklik yapabiliriz.
+```
+
+# Constraints (Kısıtlamalar)
+1. NOT NULL
+2. UNIQUE
+3. PROMARY KEY
+4. FOREIGN KEY
+5. CHECK
+6. DEFAULT
+7. CREATE INDEX
+
+```sql
+
+```
+
+
