@@ -506,7 +506,271 @@ alter column City nvarchar(30)--Customers tablosundaki City sütununun tipini de
 7. CREATE INDEX
 
 ```sql
+--**NOT NULL sütunun NULL değer kabul etmemesi için kullanılır.
+CREATE TABLE Persons (
+    ID int NOT NULL,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255) NOT NULL,
+    Age int
+) --bu şekilde kullanılır
 
+ALTER TABLE Persons
+ALTER COLUMN Age int NOT NULL --bu şekilde güncelleme yapılabilir.
+
+
+
+--**UNIQUE tekrarlanana verilerin olmaması için kullanılır.
+CREATE TABLE Persons (
+    ID int NOT NULL UNIQUE,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int
+)
+
+
+
+--**PRIMARY KEY benzersiz değerler içermelidir ve null olamaz. tabloda sadece bir tane primary key olabilir. 
+CREATE TABLE Persons (
+    ID int NOT NULL PRIMARY KEY,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int
+)
+--ya da
+CREATE TABLE Persons (
+    ID int NOT NULL,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int,
+    CONSTRAINT PK_Person PRIMARY KEY (ID,LastName)
+) --PK_Person isimlendirmesi yaptık. bir tane primary key var ama iki ayrı sütuna bağlayabildik.
+ALTER TABLE Persons
+ADD PRIMARY KEY (ID) --oluşturulmuş bir tablo üzerinden bu şekilde primary key ekleyebilir
+ALTER TABLE Persons
+DROP PRIMARY KEY -- bu şekilde kaldırırız.
+
+ALTER TABLE Persons
+ADD CONSTRAINT PK_Person PRIMARY KEY (ID,LastName)--birden fazla sütun için bu şekilde ekler
+ALTER TABLE Persons
+DROP CONSTRAINT PK_Person -- bu şekilde kaldırırız.
+
+
+
+--**FOREIGN KEY birbiriyle bağlantılı olan tablolar arasında sütunları birbirine bağlar. bu işlem oluşacak listeleme problemlerinin önüne geçer.
+CREATE TABLE Orders (
+    OrderID int NOT NULL PRIMARY KEY,
+    OrderNumber int NOT NULL,
+    PersonID int FOREIGN KEY REFERENCES Persons(PersonID)
+) --Orders tablosunun PersonID sütununu Persons tablosnun PersonID sütunundan referans alarak birbirine bağla.
+CONSTRAINT FK_PersonOrder FOREIGN KEY (PersonID)
+REFERENCES Persons(PersonID) --** bu şekilde isimlendiredebiliriz.
+
+--sonradan eklemek istersek;
+ALTER TABLE Orders
+ADD FOREIGN KEY (PersonID) REFERENCES Persons(PersonID)
+--ya da
+ALTER TABLE Orders
+ADD CONSTRAINT FK_PersonOrder
+FOREIGN KEY (PersonID) REFERENCES Persons(PersonID)
+
+--kaldırmak istersek
+ALTER TABLE Orders
+DROP CONSTRAINT FK_PersonOrder --şeklinde kullanırız.
+
+--**NOT foreign key'i isimlendirmek ilerleyen aşamalarda silebilmemiz için daha mantıklı bir yol olur.
+
+
+
+--**CHECK eklenecek değerin aralığını sınırlamak için kullanılır.
+CREATE TABLE Persons (
+    ID int NOT NULL,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int CHECK (Age>=18),
+    City varchar(255)
+) --Age sütununa 18'e eşit ya da büyük olan değerler girilebilir.
+CONSTRAINT CHK_Person CHECK (Age>=18 AND City='Sandnes') --isimlendirebiliriz. birden fazla şart koşabiliriz.
+
+ALTER TABLE Persons
+ADD CHECK (Age>=18) --sonradan ekleme yapabiliriz
+
+ALTER TABLE Persons
+ADD CONSTRAINT CHK_PersonAge CHECK (Age>=18 AND City='Sandnes')
+
+ALTER TABLE Persons
+DROP CONSTRAINT CHK_PersonAge --eklenen kısıtlamayı bu şekilde kaldırabiliriz.
+
+
+--**DEFAULT sütuna herhangi bir değer girilmediği zaman default olarak gelen değeri belirtebiliriz.
+CREATE TABLE Persons (
+    ID int NOT NULL,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int,
+    City varchar(255) DEFAULT 'Sandnes'
+) --City sütunu doldurulmazsa default olarak Sandnes gelecek.
+CREATE TABLE Orders (
+    ID int NOT NULL,
+    OrderNumber int NOT NULL,
+    OrderDate date DEFAULT GETDATE()
+) --OrderDate doldurulmazsa default olarak sistem üzerinden tarih gelecek.
+ALTER TABLE Persons
+ADD CONSTRAINT df_City
+DEFAULT 'Sandnes' FOR City --sonradan eklemek istersek eğer bu şekilde ekleyebiliriz.
+ALTER TABLE Persons
+ALTER COLUMN City DROP DEFAULT --sonradan kaldırmak için iste bu şekilde kaldırma işlemi yaparız.
+
+
+--**CREATE INDEX veritabanındaki kayıtları diğerlerinden daha hızlı alabilmek için kullanılır.
+--kullanıcılar tarafından bu indexler görünmez.
+--fakat güncelleme yaparken indexler güncellemeyi yavaşlatacağı için mümkün olduğunca çok kullanılan sütunlar için index oluşturulur.
+CREATE INDEX idx_pname
+ON Persons (LastName, FirstName) --idx_pname adında bir index oluşturduk.
+
+DROP INDEX table_name.index_name --bu şekilde oluşturulan indexi kaldırdık.
+
+
+--** AUTO INCREMENT yeni bir kayıt eklendiğinde artış sağlayarak benzersiz bir kayıt elde ederiz.
+--genellikle primary key olan sütunumuz auto-increment olur
+CREATE TABLE Persons (
+    Personid int IDENTITY(1,1) PRIMARY KEY,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int
+) -- IDENTITY ile kullanılır ve 1'den başla 1'er 1'er art demiş olduk. (10,5) deseydik 10'dan başlar ve 5'er 5'er artardı.
+INSERT INTO Persons (FirstName,LastName)
+VALUES ('Lars','Monsen') --tabloya bir kaydı bu şekilde eklesek bile PersonID'ye otomatik olarak değer gelecektir. 
+
+
+--** Dates tarih eklemelerinde eklemek istediğimiz tarih formatının veritabanı formatına uygun olması gerekmektedir.
+DATE - format YYYY-MM-DD
+DATETIME - format: YYYY-MM-DD HH:MI:SS
+SMALLDATETIME - format: YYYY-MM-DD HH:MI:SS
+TIMESTAMP - format: a unique number
+
+
+
+--**CREATE VIEW bir veya birden fazla tablodan istenilen verileri sanki tek bir tabloymuş gibi görüntülememizi sağlar.
+CREATE VIEW [Brazil Customers] AS
+SELECT CustomerName, ContactName
+FROM Customers
+WHERE Country = 'Brazil' --şeklinde yazılır
+
+SELECT * FROM [Brazil Customers] -- ülkesi Brazil olanların CustomerName ve ContactName'lerini getirir.
+CREATE VIEW [Products Above Average Price] AS
+SELECT ProductName, Price
+FROM Products
+WHERE Price > (SELECT AVG(Price) FROM Products) --şartta belirtebiliriz.
+
+CREATE OR REPLACE VIEW [Brazil Customers] AS
+SELECT CustomerName, ContactName, City
+FROM Customers
+WHERE Country = 'Brazil' --view sorgumuzu güncellemek için CREATE OR REPLACE VIEW kullanılır.
+DROP VIEW [Brazil Customers] -- bu şekilde oluşturduğumuz view silinir.
 ```
 
+# STRING VERİ TİPLERİ
+1. CHAR(n)
+    - 0-255 arasında karakterler alır.
+    - Genellikle çok değişmeyen ülke kodları, posta numaraları gibi durumlarda kullanılır.
+2. VARCHAR(n)
+    - varchar(15) yazıp 3 harfli bir kelime girersek, varchar(3) şeklinde yer edinecek.
+    - Bu durum daha az yer kaplayacağı için performansı artırır.
+    - maksimum 1.073.741.824 karakter alabilir.
+3. text
+    - metin verileri için kullanılır.
+    - 2gb'a kadar veri depolayabilir.
+4. nchar
+    - char'ın yarısı kadar veri depolayabilir.
+5. nvarchar
+    - varchar'ın yarısı kadar veri depolayabilir.
+    - maksimum 536.870.912 karakter alabilir.
+6. ntext
+    - unicode'lar depolayabiliriz.
+    -2gb'a kadar unicode depolanabilir.
+7. binary(n)
+    - 8000 byte kadar veri depolar.
+    - n değeri kadar yer kaplar
+8. varbinary
+    - 8000 byte kadar veri depolar.
+    -girilen değer kadar yer kaplar.
+9. varbinary(max)
+    - 2gb kadar binary veri depolayabilir.
+10. image
+    - Resim dosyalarını saklamak için kullanılır.
+    - İşlevsellik olarak varbinary(max) ile aynıdır.
+    - İlerleyen zamanda bu veri türünün kaldırılma ihtimali olduğu için varbinary(max) kullanılması önerilir.
+
+
+# NUMERIK VERİ TİPLERİ
+1. bit
+    - 0, 1 veya null değerler depolanır
+    - True False işlemleri için uygundur.
+2. tintint
+    - 0-255 arası tam sayıları depolar.
+    - Genellikle yaş verileri gibi durumlarda kullanırız.
+3. smallint
+    - -32.768 - 32.767 arası tam sayıları depolar.
+4. int 
+    - -2,147,483,648 - 2,147,483,647 arası tam sayıları depolar.
+    - En çok kullanılan veri tipidir.
+5. bigint
+    - -9,223,372,036,854,775,808 - 9,223,372,036,854,775,807 arası tam sayıları depolar.
+6. decimal(p,s)
+    - Ondalıklı sayılarda kullanılır.
+    - p toplam basamak sayısını,
+    - s ise virgülsen sonraki ondalık kısmı gösterir.
+7. numeric(p,s)
+    - decimal ile aynıdır.
+8. smallmoney
+    - -214,748.3648 - 214,748.3647 arasında ondalık sayı depolar. 
+    - Ondalık kısmı 4 basamağa kadardır.
+9. money
+    -  -922,337,203,685,477.5808 - 922,337,203,685,477.5807 arası ondalık sayıları depolar.
+    - Ondalık kısmı 4 basamağa kadardır.
+10. float(n)
+    - 1-53 arası onladıklı sayı depolar.
+    - n belirtilmezse default olarak 53 olur.
+11. real
+    - 3.40E+38 ile 3.40E+38 arasında değer alır
+    - ???
+
+
+# Tarih ve Saat Veri Tipleri
+1. datetime
+    - YYYY-MM-DD hh:mm:ss:mmm şeklinde varsayılan formatı vardır.
+2. datetime2
+    - YYYY-MM-DD hh:mm:ss:mmmmmmm şeklinde varsayılan formatı vardırç
+    - datetime ile farklı salisesi 7 basamağa kadar çıkabilir.
+3. smalldatetime
+    - YYYY-MM-DD hh:mm:ss şeklinde varsayılan formatı vardır.
+4. date
+    - En yaygın tarih depolama tipidir.
+    - YYYY-MM-DD şeklinde varsayılan formatı vardır.
+5. time
+    - Sadece saat verilerini depolar.
+    - hh:mm:ss:nnnnnnn şeklinde varsayılan formatı vardır.
+6. datetimeoffset
+    - Kullanım şekli ve veri aralığı olarak datetime2 ile aynıdır.
+    - 11.09.2023 20:30:15.1234567 +03:00 şeklinde varsayılan formatı vardır. 
+7. timestamp
+    - Bir kayıt oluşturulduğunda ya da değiştirildiğinde güncellenen bir veri saklar.
+    - Gerçek zamana karşılık gelmez.
+
+
+# Diğer Veri Tipleri
+1. sql_variant
+    - sayısal, text bazlı, binary gibi veri tiplerini depolayabilir.
+    - Maksimum uzunluğu 8000 byte
+2. uniqueidentifier
+    -  Guid (Globally unique Identifier) tipinde veri tutar.
+    - Her üretildiğinde benzersiz oluşur
+3. xml
+    - xml türündeki verileri depolamak için kullanılır.
+    -Kapasitesi 2gb.
+    - xml verisinin boyutuna göre kapladığı yer değişkenlik gösterir.
+4. cursor
+    - Belirli bir veri kümesi üzerinde satır satır işlem yapmamızı sağlar.
+5. table
+    - Daha sonra işlenmesi için içerisinde bir sonuç verisi saklar.
 
