@@ -18,8 +18,9 @@
 9. DROP TABLE
     1. Veritabanındaki tabloyu siler.
 10. CREATE INDEX 
-    1. 
+    1. Index oluşturur 
 11. DROP INDEX
+    1. Indexi siler
 
  
 ```sql 
@@ -301,7 +302,7 @@ ORDER BY a.City --2 ayrı Customers tablosunda CustomerID'leri birbiriyle aynı 
 ![C:\Users\musta\OneDrive\Masaüstü\SQLDers](img_right_join.png) 
 ![C:\Users\musta\OneDrive\Masaüstü\SQLDers](img_full_outer_join.png) 
 ```sql
---**UNION Birdeb fazla Select ifadesinin sonucunu tek bir sütunda toplar ve getirir.
+--**UNION Birden fazla Select ifadesinin sonucunu tek bir sütunda toplar ve getirir.
 SELECT City FROM Customers
 UNION
 SELECT City FROM Suppliers
