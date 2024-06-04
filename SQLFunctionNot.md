@@ -118,3 +118,114 @@ select trim('    levent    ') --sağdan ve soldan tüm boşlukları siler.
 ```sql
 select unicode('levent')--verilen değerin ilk harfinin Unicode değerini döner.
 ```
+# Numeric Fonksiyonlar
+1. ABS() Fonksiyonu
+```sql
+select abs(-152.2) -- verilen değerin mutlak değerini döndürür.
+```
+2. ACOS() Fonksiyonu
+```sql
+select acos(0.25) --verilen değerin arkcosinüsünü döndürür.
+```
+3. ASIN() Fonksiyonu
+```sql
+select asin(0.25) --arksinüs döndürür
+```
+4. ATAN() Fonksiyonu
+```sql
+select atan(2.5) --arktanjant döndürür
+```
+5. ATN2() Fonksiyonu
+```sql
+select atn2(0.50 , 1) --arktanjant döndürür.
+```
+6. AVG() Fonksiyonu
+```sql
+select avg(UnitPrice) from Products --değerlerin ortalamarını hesaplar.
+```
+7. CEILING() Fonksiyonu
+```sql
+select ceiling(36.70) --ondalıklı sayıyı bir üste yuvarlar.
+```
+8. COUNT() Fonksiyonu
+```sql
+select count(ProductID) from Products --Belirtilen sütunun kaç tane kaydı var bize döndürür.
+```
+9. COS() Fonksiyonu
+```sql
+select cos(2) --değerin kosinüsünü döndürür.
+```
+10. COT() Fonksiyonu
+```sql
+select cot(6) --değerin kotanjantını döndürür
+```
+11. SIN() Fonksiyonu
+```sql
+select sin(2) --sayının sinüsünü döndürür.
+```
+12. TAN() Fonksiyonu
+```sql
+select tan(1.75) --sayının tanjantını döndürür.
+```
+13. DEGREES() Fonksiyonu
+```sql
+select degrees(1.5) --radyan cinsinden değeri dereceye döndürür.
+```
+14. FLOOR() Fonksiyonu
+```sql
+select floor(25.75) --ondalıklı sayı bir alta yuvarlar.
+```
+15. LOG() Fonksiyonu
+```sql
+select log(2) --değerin logaritmasını döndürür.
+```
+16. LOG10() Fonksiyonu
+```sql
+select log10(2) --değerin 10'luk tabandaki logaritmasını döndürür.
+```
+17. MAX() Fonksyionu
+```sql
+select max(UnitPrice) from Products --en yüksek kaydı getirir.
+```
+18. MIN() Fonksiyonu
+```sql
+select min(UnitPrice) from Products --en düşük kaydı getirir.
+```
+19. PI() Fonksiyonu
+```sql
+select pi() --pi değerini döndürür.
+```
+20. POWER() Fonksiyonu
+```sql
+select power(4,2) --4'ün 2. üssünü alır 
+```
+21. RADIANS() Fonksiyonu
+```sql
+select radians(180) --dereceyi radyan değere döndürür.
+```
+22. RAND() Fonksiyonu
+```sql
+select rand() --0-1 arasında rastgele sayı döndürür.
+```
+23. ROUND() Fonksiyonu
+```sql
+select round(234.423, 2) -- sayının odalığının son iki basamağını yukarı ya da aşağı yuvarlar.
+```
+24. SIGN() Fonksiyonu
+```sql
+select sign(255.5) --sayı 0'dan büyükse 1 dönecek.
+--0'dan küçükse -1
+--0'a eşitse 0 dönecek
+```
+25. SQRT() Fonksiyonu
+```sql
+select sqrt(64) --sayının karekökünü döner.
+```
+26. SQUARE() Fonksiyonu
+```sql
+select square(64) --sayının karesini döner
+```
+27. SUM() Fonksiyonu
+```sql
+select sum(Quantity) from OrderDetails --Quantity'nin toplamını döndürür.
+```
