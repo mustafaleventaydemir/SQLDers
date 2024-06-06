@@ -55,7 +55,7 @@ from Customers--verilen değeri büyük harfe çevirir.
 12. LTRIM() - RTRIM() Fonksiyonu
 ```sql
 select ltrim('     leventaydemir') --soldan boşlukları siler.
-select rtrim('     leventaydemir') --sağdan boşlukları siler.
+select rtrim('leventaydemir     ') --sağdan boşlukları siler.
 ```
 13. NCHAR() Fonksiyonu
 ```sql
