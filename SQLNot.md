@@ -264,7 +264,7 @@ FROM Customers AS c, Orders AS o
 WHERE c.ContactName='Around the Horn' AND c.CustomerID=o.CustomerID --tablolara takma isim vererek yazmış olduğumuz kodları kısaltabilir ve anlaşılabilirliğini artırabiliriz.
 ```
 ```sql
---***JOIN*** iki veya daha fazka tablodaki satırları, aralarındaki ilgili sütuna göre birleştirir.
+--***JOIN*** iki veya daha fazla tablodaki satırları, aralarındaki ilgili sütuna göre birleştirir.
 select o.OrderID, c.ContactName, o.OrderDate
 from Orders AS o
 INNER JOIN Customers AS c ON o.CustomerID=c.CustomerID --Orders tablosu ile Customers tablosunun aralarında bağlantı olan CustomerId'lerin birbirine eşit olanlarının kayıtlarını getirir.
@@ -500,7 +500,7 @@ alter column City nvarchar(30)--Customers tablosundaki City sütununun tipini de
 # Constraints (Kısıtlamalar)
 1. NOT NULL
 2. UNIQUE
-3. PROMARY KEY
+3. PRIMARY KEY
 4. FOREIGN KEY
 5. CHECK
 6. DEFAULT
@@ -520,7 +520,7 @@ ALTER COLUMN Age int NOT NULL --bu şekilde güncelleme yapılabilir.
 
 
 
---**UNIQUE tekrarlanana verilerin olmaması için kullanılır.
+--**UNIQUE tekrarlanan verilerin olmaması için kullanılır.
 CREATE TABLE Persons (
     ID int NOT NULL UNIQUE,
     LastName varchar(255) NOT NULL,
@@ -707,7 +707,7 @@ DROP VIEW [Brazil Customers] -- bu şekilde oluşturduğumuz view silinir.
 1. bit
     - 0, 1 veya null değerler depolanır
     - True False işlemleri için uygundur.
-2. tintint
+2. tinyint
     - 0-255 arası tam sayıları depolar.
     - Genellikle yaş verileri gibi durumlarda kullanırız.
 3. smallint
